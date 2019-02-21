@@ -37,10 +37,12 @@ const app = new Koa();
 
 // 响应
 app.use(ctx => {
-  ctx.response.body = 'Hello World';
+    ctx.response.body = 'Hello World';
 });
 
-app.listen(3000);
+app.listen(3000, () => {
+    console.log('App started on http://localhost:3000')
+});
 ```
 
 在上面的代码中，`app.use()` 指定了一个中间件方法，这个中间件接收 Koa 创建的上下文（context），并且修改了 `response.body` 发送给客户端。
@@ -50,7 +52,9 @@ app.listen(3000);
 接下来就是启动服务，执行：
 
 ```shell
-node app.js
+$ node app.js
+
+App started on http://localhost:3000
 ```
 
 浏览器访问 http://localhost:3000/ , 可以看到显示 “Hello World” 字样，证明我们服务已经搭建好。
