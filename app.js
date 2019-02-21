@@ -2,48 +2,33 @@
 const Koa = require('koa');
 const app = new Koa();
 
-const fs = require('fs'); // 引入fs
+// 引入模板引擎
+const koaNunjucks = require('koa-nunjucks-2');
+const path = require('path');
 
-/**
- * 从app/view目录读取HTML文件
- * @param {string} page 路由指向的页面
- * @returns {Promise<any>}
- */
-function readPage( page ) {
-    return new Promise(( resolve, reject ) => {
-        const viewUrl = `./app/view/${page}`;
-        fs.readFile(viewUrl, "binary", ( err, data ) => {
-            if ( err ) {
-                reject( err )
-            } else {
-                resolve( data )
-            }
-        })
-    })
-}
+// 引入路由文件
+const router = require('./app/router');
 
-// 路由
-app.use(async ctx => {
-    const {url} = ctx.request;
-    let page;
-    switch ( url ) {
-        case '/':
-            page = 'index.html';
-            break;
-        case '/index':
-            page = 'index.html';
-            break;
-        case '/home':
-            page = 'home.html';
-            break;
-        default:
-            page = '404.html';
-            break
+// 使用模板引擎
+app.use(koaNunjucks({
+    ext: 'html',
+    path: path.join(__dirname, 'app/view'),
+    nunjucksConfig: {
+        trimBlocks: true // 开启转义 防止Xss
     }
-    ctx.response.type = 'html'; // 这里设置返回的类型是html
-    ctx.response.body = await readPage(page);
+}));
+
+// 使用中间件 处理404
+app.use(async (ctx, next) => {
+    await next(); // 调用next执行下一个中间件
+    if(ctx.status === 404) {
+        await ctx.render('404');
+    }
 });
 
+// 使用koa-router中间件
+app.use(router.routes()).use(router.allowedMethods());
+
 app.listen(3000, () => {
-    console.log('App started on http://localhost:3000')
+    console.log('App started on http://localhost:3000/api')
 });
