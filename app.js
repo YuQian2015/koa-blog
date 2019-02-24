@@ -9,6 +9,9 @@ const path = require('path');
 // 引入路由文件
 const router = require('./app/router');
 
+// 引入logger
+const logger = require('./app/middleware/logger');
+
 // 使用模板引擎
 app.use(koaNunjucks({
     ext: 'html',
@@ -17,6 +20,8 @@ app.use(koaNunjucks({
         trimBlocks: true // 开启转义 防止Xss
     }
 }));
+
+app.use(logger()); // 处理log的中间件
 
 // 使用中间件 处理404
 app.use(async (ctx, next) => {

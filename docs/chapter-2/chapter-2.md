@@ -1,4 +1,14 @@
-*路由将 URL 解析到对应的处理程序。这里我们将使用 Koa 的中间件 [koa-router](https://github.com/alexmingoia/koa-router) 来处理请求，将请求解析到对应的控制器（controller）上，实现访问不同地址获得不同的结果。不过在此之前，我们先了解使用原生koa实现路由的方式。*
+*路由将 URL 解析到对应的处理程序。*
+
+经过上一节的实战，我们已经有了下面的目录结构：
+
+```
+koa-blog
+├── package.json
+└── app.js
+```
+
+我们将使用 Koa 的中间件 [koa-router](https://github.com/alexmingoia/koa-router) 来处理请求，把请求解析到对应的控制器（controller）上，实现访问不同地址获得不同的结果。在这之前，我们先了解使用原生 Koa 实现路由的方式。
 
 ### Koa原生路由实现
 
@@ -225,7 +235,7 @@ app.listen(3000, () => {
 
 #### 单独管理路由
 
-考虑到以后项目会复杂很多，我们把路由独立出来，新增文件管理路由：
+考虑到以后项目会复杂很多，我们把路由独立出来管理：
 
 ```js
 // app/router/index.js
@@ -269,8 +279,9 @@ router.get('/home', home);
 
 module.exports = router;
 
+```
 
-
+```js
 // app.js
 const Koa = require('koa');
 const app = new Koa();
@@ -293,10 +304,9 @@ app.use(router.routes()).use(router.allowedMethods());
 app.listen(3000, () => {
     console.log('App started on http://localhost:3000')
 });
-
 ```
 
-重新启动服务，访问 http://localhost:3000/ 看看是否生效。
+通过上面的代码，我们已经实现路由独拿在一个目录维护，以后我们都将在 `app/router/` 里面进行路由的创建，重新启动服务，访问 http://localhost:3000/ 看看是否生效。
 
 #### 使用模板引擎
 
@@ -308,7 +318,7 @@ app.listen(3000, () => {
 $ npm i koa-nunjucks-2 --save
 ```
 
-在使用路由之前应用 koa-nunjucks-2：
+在使用路由中间件之前应用 koa-nunjucks-2：
 
 ```js
 // app.js
@@ -345,9 +355,9 @@ app.use(router.routes()).use(router.allowedMethods());
 app.listen(3000, () => {
     console.log('App started on http://localhost:3000')
 });
+```
 
-
-
+```js
 // app/router/index.js
 
 const Router = require('koa-router');
@@ -366,6 +376,14 @@ router.get('/index', index);
 router.get('/home', home);
 
 module.exports = router;
+```
+
+我们的路由统一使用了 `app/view/index.html` 作为模板文件，因此删除没有用到的文件 `app/view/home.html` ，在 `app/view/index.html` 中我们接收了传递的参数：
+
+```html
+<!--app/view/index.html-->
+<h1>{{title}} Page</h1>
+<a href="/{{link}}">home</a>
 ```
 
 #### 分模块管理路由
@@ -443,9 +461,19 @@ app.listen(3000, () => {
 });
 ```
 
+```html
+<!--app/view/404.html-->
+<h1>404</h1>
+<a href="/api/index">index</a>
+
+<!--app/view/index.html-->
+<h1>{{title}} Page</h1>
+<a href="/api/{{link}}">home</a>
+```
+
 重新启动服务，访问 http://localhost:3000/api 和  http://localhost:3000/api/home 即可看到新配置的路由。
 
-删除没有用到的文件 `app/view/home.html` 之后，整个文件目录如下：
+完成这一节实战之后，整个文件目录如下：
 
 ```
 koa-blog
@@ -462,3 +490,4 @@ koa-blog
     └── config.js
 
 ```
+下一步，我们来实现log… 
