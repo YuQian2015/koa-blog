@@ -424,7 +424,7 @@ module.exports = router;
 #### 为路由增加前缀
 
 ```js
-// config.js
+// config/config.js
 
 const CONFIG = {
     "API_PREFIX": "/api" // 配置了路由前缀

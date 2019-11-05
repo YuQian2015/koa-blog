@@ -30,7 +30,7 @@ npm install log4js --save
 我们来修改 `config.js` ，对 log4js 进行一些设置：
 
 ```json
-// config.js
+// config/config.js
 
 const CONFIG = {
     "API_PREFIX": "/api", // 配置了路由前缀
