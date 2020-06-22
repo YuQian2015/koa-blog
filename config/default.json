@@ -1,0 +1,18 @@
+// config/default.json
+
+{
+    "App": {
+        "ip": "0.0.0.0", // 所有ip可以访问
+        "port": 3000 // 端口
+    },
+    "Router": {
+        "apiPrefix": "/api" // 路由前缀
+    },
+    "Database": {
+        "user": "moyufed", // MongoDB用户名
+        "password": "123456", // MongoDB密码
+        "host": "127.0.0.1",
+        "dbName": "koaBlog", // MongoDB数据库名
+        "port": 3001
+    }
+}

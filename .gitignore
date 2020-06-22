@@ -1,3 +1,4 @@
 node_modules/
-.idea
-logs
+.idea/
+logs/
+.env

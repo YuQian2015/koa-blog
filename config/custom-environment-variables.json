@@ -1,0 +1,13 @@
+{
+    "App": {
+        "ip": "APP_IP", // 所有ip可以访问
+        "port": "APP_PORT" // 端口
+    },
+    "Database": {
+        "user": "DB_USER", // MongoDB用户名
+        "password": "DB_PASSWORD", // MongoDB密码
+        "host": "DB_HOST",
+        "dbName": "DB_NAME", // MongoDB数据库名
+        "port": "DB_PORT"
+    }
+}

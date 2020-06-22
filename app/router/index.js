@@ -1,10 +1,10 @@
 // app/router/index.js
 
-const config = require('../../config/config');
-
 const Router = require('koa-router');
+const config = require('config'); // 引入config
+const apiPrefix = config.get('Router.apiPrefix');
 const router = new Router();
-router.prefix(config.API_PREFIX); // 设置路由前缀
+router.prefix(apiPrefix); // 设置路由前缀
 const home = require('./home');
 
 const index = async (ctx, next) => {

@@ -16,7 +16,7 @@
 为了方便在命令行执行 `mongod` 、`mongo` 命令, 需要将安装路径添加到系统环境变量。
 在**计算机**-**属性**-**高级系统设置**-**环境变量**，找到path，双击编辑，在里面添加上面的安装目录（本机为例：`C:\Program Files\MongoDB\Server\3.4\bin`），添加完成后可以在命令行执行：
 
-```powershell
+```shell
 $ mongod
 ```
 
@@ -32,7 +32,7 @@ $ mongod
 
 打开命令面板（快捷键 win+r 输入 cmd 回车），注意，需要**以管理员身份**在命令行执行：
 
-```powershell
+```shell
 $ mongod --bind_ip 127.0.0.1 --logpath "C:\MongoDB\log\mongod.log" --logappend --dbpath "C:\MongoDB\db" --port 3001 --serviceName "koa-blog" --serviceDisplayName "koa-blog" --install
 ```
 
@@ -64,7 +64,7 @@ storage:
 
 接下来执行：
 
-```powershell
+```shell
 $ mongod --config "C:\MongoDB\mongod.cfg" --serviceName "koa-blog" --serviceDisplayName "koa-blog" --install
 ```
 
@@ -96,7 +96,7 @@ Error parsing YAML config file: YAML-cpp: error at line 2, column 13 : illegal m
 
 可以通过 `net start koa-blog` 启动服务器，我们来试试，以管理员身份在命令行执行：
 
-```powershell
+```shell
 $ net start koa-blog
 ```
 
@@ -110,7 +110,7 @@ $ net start koa-blog
 
 打开命令行终端，执行以下命令即可连接到数据库：
 
-```powershell
+```shell
 $ mongo mongodb://127.0.0.1:3001
 # 或者
 $ mongo -port 3001
@@ -149,7 +149,7 @@ switched to db admin
 
 那么首先来创建一个管理员用户，这个用户具有创建管理其他用户的权限：
 
-```powershell
+```shell
 > db.createUser(
    {
 ...     user: "admin",
@@ -173,7 +173,7 @@ Successfully added user: {
 
 上面的命令的 `···` 是换行，如果在命令行里面不能换行，可以整理成一行来执行。如：
 
-```powershell
+```shell
 > db.createUser( { user: "admin",pwd: "admin", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]} )
 ```
 
@@ -185,7 +185,7 @@ Successfully added user: {
 
 之前的启动数据库的方式并不是访问控制的，我们删掉之前安装的 Windows service , 以管理员身份执行 `sc delete koa-blog` ：
 
-```powershell
+```shell
 # 执行 exit 退出数据库连接
 > exit
 bye
@@ -197,7 +197,7 @@ $ sc delete koa-blog
 
 接着启用权限控制，执行下面的命令，**执行之前确保系统 MongoDB 进程关闭**，这里使用的 `--auth` 是用来开启授权启动：
 
-```powershell
+```shell
 $ mongod --config "C:\MongoDB\mongod.cfg" --serviceName "koa-blog" --serviceDisplayName "koa-blog" --auth --install
 
 $ net start koa-blog
@@ -209,13 +209,13 @@ $ net start koa-blog
 
 既然超级用户已经被我们创建好了（这个超级用户是在 `admin` 数据库），那么我们先连接数据库：
 
-```powershell
+```shell
 $ mongo -port 3001
 ```
 
 为了测试在不验证用户的情况下是否能进行数据操作，我们先不登录这个超级用户，而是切换到一个数据库 `koaBlog`， 执行 `use koaBlog` 切换到 `koaBlog` 数据库。我们可以执行 `db` 查看当前的数据库。先来插入一条数据试试：
 
-```powershell
+```shell
 > db.koaBlog.insert({name:'Moyufed'})
 ```
 
@@ -227,7 +227,7 @@ $ mongo -port 3001
 
 因此我们切换到 `admin` 数据库去登录账号：
 
-```powershell
+```shell
 > use admin
 switched to db admin
 > db
@@ -243,7 +243,7 @@ admin
 我们上面创建的 `admin` 用户只能 [管理用户和权限](https://docs.mongodb.com/master/tutorial/manage-users-and-roles/)，如果要执行其它操作，如从数据库中查询数据，MongoDB 会返回错误。
 下面我们来为 `koaBlog`创建一个有 [读写权限](https://docs.mongodb.com/master/reference/built-in-roles/#readWrite) 的用户：
 
-```powershell
+```shell
 # 执行
 > use koaBlog
 switched to db koaBlog
@@ -274,7 +274,7 @@ Successfully added user: {
 
 但是需要注意的是，我们刚刚创建的这个用户的信息是存放在 `admin` 库中的，为了验证，我们接着换到 `admin`库，看一下刚刚创建的用户，首先切换到 `admin` 数据库肯定要先 `use admin` ，接着执行下面的命令查找用户：
 
-```powershell
+```shell
 > use admin
 switched to db admin
 > db.system.users.find({user:'moyufed'})
@@ -286,7 +286,7 @@ switched to db admin
 
 我们现在用新增的用户来连接数据库，下面的命令演示不同的方式启动和连接数据库，在连接数据库时就进行验证，和前面的 `admin` 用户登录的方式效果一样，前面的方式是先连接数据库再验证：
 
-```powershell
+```shell
 # 先退出连接
 > exit
 bye
@@ -301,7 +301,7 @@ MongoDB server version: 3.4.5
 
 既然已经验证成功，我们就可以尝试着来写入数据了，首先还是要切换到 `koaBlog` 数据库（我们的用户是在这个数据库创建的），接着我们来执行插入数据。
 
-```powershell
+```shell
 > use koaBlog
 switched to db koaBlog
 > db.koaBlog.insert({name:'Moyufed'})
@@ -341,13 +341,13 @@ OK！我们已经能正常写入数据了。
 
 更新用户
 
-```powershell
+```shell
 > db.updateUser([用户名],{用户对象, 与创建时一样})  # 后面还有一个可选参数writeConcern, 一般不写
 ```
 
 创建用户时和更新用户都需要属性`user` `pwd` `roles`成功修改后没有任何提示. 如下:
 
-```powershell
+```shell
 # 修改密码并且修改角色为只读
 > db.updateUser('test',{user:'test',pwd:'admin',roles:[{role:'read',db:'testDB'}]})
 >
@@ -357,7 +357,7 @@ OK！我们已经能正常写入数据了。
 
 删除用户
 
-```powershell
+```shell
 > use testDB
 switched to db testDB
 > db.dropUser('test')

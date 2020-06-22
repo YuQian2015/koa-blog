@@ -22,7 +22,7 @@ koa-blog
 我们使用 [log4js-node](https://github.com/log4js-node/log4js-node) 来记录日志：
 
 ```shell
-npm install log4js --save
+$ npm install log4js --save
 ```
 
 ### 设置
