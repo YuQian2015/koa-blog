@@ -18,10 +18,6 @@ const ArticleSchema = new Schema({
         default: 1
     },
     summary: String, // 简介
-    type: { // 类型 1 同事圈 2 知识库 3 专栏号
-        type: Number,
-        default: 0
-    },
     cover: String, // 封面
     publishDate: Date, // 发布时间
 }, {

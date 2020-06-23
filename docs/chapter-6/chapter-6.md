@@ -121,10 +121,6 @@ const ArticleSchema = new Schema({
         default: 1
     },
     summary: String, // 简介
-    type: { // 类型 1 同事圈 2 知识库 3 专栏号
-        type: Number,
-        default: 0
-    },
     cover: String, // 封面
     publishDate: Date, // 发布时间
 }, {
@@ -260,95 +256,78 @@ module.exports = {
 
 Controller（控制器）是应用程序中处理用户交互的部分，通常控制器负责从视图读取数据，控制用户输入，并向模型发送数据。接下来我们将创建 `controller` 向 `service` 发送数据。
 
-首先创建 `app/controller `目录和
-
-#### 使用modal
-
-首先新建一个 `app/model/index.js`
+首先创建 `app/controller ` 目录和对应的文件 `app/controller/index.js` 、 `app/controller/article.js`  ：
 
 ```js
-// app/model/index.js
+// app/controller/article.js
+
+const { article } = require("../service"); // 引入service
+
+class ArticleController {
+  async create(ctx) {
+    try {
+      const newArticle = await article.create({
+        title: "第一条数据",
+        content: "从零开始的koa实战",
+        summary: "实战"
+      });
+      ctx.body = newArticle;
+    } catch (err) {
+      ctx.body = err;
+      throw new Error(err);
+    }
+  }
+}
+
+module.exports = new ArticleController();
+```
+
+上面的代码中，我们先固定创建一条数据，在 `ArticleController` 中，我们使用了 `service` 定义的 `create` 方法来向数据库创建记录，并且我们依照 ArticleSchema 定义的数据模型进行传参。接着，将 `ArticleController`  导出：
+
+```js
+// app/controller/index.js
 
 const article = require('./article');
 
 module.exports = {
-    article
+  article,
 };
 ```
 
-我们可以先尝试新增一个路由来解析到 `article` 的处理逻辑，这部分的处理我们将在后面通过 **controller** 和 **service** 来实现，但现在不妨试试看能否操作 MongoDB 。
+### 修改路由
 
-首先来新增一个
+前面已经将新增数据的处理逻辑对应到了 controller，接下来我们修改 `routes/index.js` 的路由设置，让请求能够指定到对应的 controller 上。在下面的代码中，我们暂时使用 get 类型来做测试：
 
-新增数据：
+```diff
+// app/router/index.js
 
-routes/material.js
+const Router = require('koa-router');
+const config = require('config'); // 引入config
+const apiPrefix = config.get('Router.apiPrefix');
+const router = new Router();
+router.prefix(apiPrefix); // 设置路由前缀
+const home = require('./home');
++ const { article } = require('../controller'); // 引入controller
 
-```js
-const {material} = require('../models');
-const router = require('koa-router')();
+const index = async (ctx, next) => {
+    await ctx.render('index', {title: 'Index', link: 'home'});
+};
 
-router.get('/', async (ctx, next) => {
-
-  try {
-    ctx.response.body = await material.create({
-      code: 'ZB-M-00001', // 食材编号
-      purchasingDate: new Date(), // 采购日期
-      name: '土豆', // 名称
-      manufactureDate: new Date(), //生成日期
-      qualityPeriod: new Date(), // 保质期
-      quantity: 1, // 数量
-      unit: '个', // 单位
-      price: 10, // 单价
-      totalPrice: 10, // 金额
-      purchaserName: 'Yuu', // 采购人
-      inspectorName: 'Yuu', // 收验货人
-      supplierName: 'Z', // 供货人
-      sign: '123456789.png', // 签字
-    });
-  } catch (err) {
-    console.log(err)
-    throw new Error(err);
-  }
-});
-
-module.exports = router;
-
-```
-
-我们修改 routes/index.js 的路由设置。
-
-```js
-……
-const users = require('./users');
-const material = require('./material');
-const routeConfig = [
-  {
-    path: '/users',
-    route: users
-  }, {
-    path: '/material',
-    route: material
-  }
-]
-
-……
-
-router.use(logger);
 router.get('/', index);
-
-for (let item in routeConfig) {
-  router.use(routeConfig[item].path, routeConfig[item].route.routes(), routeConfig[item].route.allowedMethods());
-}
+router.get('/index', index);
++ router.get('/article', article.create);
+router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路由
 
 module.exports = router;
 ```
 
-重启服务访问 http://localhost:3000/v1/material 即可看到新增的数据了，并且数据库添加了新的数据。
+我们将路由的 `/article` 对应到了 `articleController` 的 `create` 方法，当我们重启服务之后，在浏览器访问： http://localhost:3000/api/article ，可以看到已经创建了一条数据。页面中显示的数据如：
 
-![01](01.jpg)
+```json
+{"status":1,"_id":"5ef204b5b40da108dc47ae30","title":"第一条数据","content":"从零开始的koa实战","summary":"实战","createDate":"2020-06-23T13:33:41.858Z","updateDate":"2020-06-23T13:33:41.858Z","__v":0}
+```
 
-![02](02.jpg)
+到这里，我们已经能够通过请求对MongoDB数据库进行数据插入，以后我们还将继续完善各项逻辑。
 
 
 参考资料：
