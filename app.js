@@ -5,6 +5,8 @@ const config = require('config'); // 引入config
 const appConfig = config.get('App'); // 直接使用 config 获取App的配置
 const apiPrefix = config.get('Router.apiPrefix'); // 可以通过Router.apiPrefix获取具体的值
 const dbConfig = config.get('Database');
+const { mongooseConnect } = require('./config/plugin');
+mongooseConnect();
 console.log(dbConfig);
 console.log(process.env.DB_PASSWORD); // 123456
 console.log(appConfig); // 输出获取的 appConfig

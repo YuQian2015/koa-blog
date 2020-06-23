@@ -1,5 +1,8 @@
 // app/router/index.js
 
+const { article } = require('../controller'); // 引入config
+console.log(article);
+
 const Router = require('koa-router');
 const config = require('config'); // 引入config
 const apiPrefix = config.get('Router.apiPrefix');
@@ -13,6 +16,7 @@ const index = async (ctx, next) => {
 
 router.get('/', index);
 router.get('/index', index);
+router.get('/article', article.create);
 router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路由
 
 module.exports = router;

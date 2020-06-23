@@ -35,9 +35,9 @@ $ npm install config dotenv-safe --save
 
 ### 配置运行环境
 
- 会默认去查看项目根目录的 `config` 文件夹，所以我们需要创建一个 `config`目录，这个在之前的实战已经做了。
+ [config ](https://www.npmjs.com/package/config) 会默认去查看项目根目录的 `config` 文件夹，所以我们需要创建一个 `config` 目录，这个在之前的实战已经做了。
 
-接着，来创建一个默认的配置文件 `default.json`，其中包含了我们的数据库设置以及服务的启动设置。以本项目为例，配置如下：
+接着，来创建一个默认的配置文件 `default.json` ，其中包含了我们的数据库设置以及服务的启动设置。以本项目为例，配置如下：
 
 ```js
 // config/default.json
@@ -128,7 +128,7 @@ module.exports = CONFIG;
 
 ### 配置多个环境
 
-经过上面的介绍，我们已经通过config来配置运行环境了，但仅是这样我们并不能实现多个环境的配置，因此，现在我们来配置一个新的环境。
+经过上面的介绍，我们已经通过 config 来配置运行环境了，但仅是这样我们并不能实现多个环境的配置，因此，现在我们来配置一个新的环境。
 
 接下来，配置一个生产环境（production），我们需要在 `config` 目录新建一个 `production.json` 文件：
 
@@ -147,8 +147,8 @@ module.exports = CONFIG;
 为了验证配置是否生效，我们来切换到production环境：
 
 ```shell
-'export NODE_ENV=production'  // Linux
-'set NODE_ENV=production'. // Windows
+'export NODE_ENV=production' // Linux
+'set NODE_ENV=production' // Windows
 ```
 
 同样，为了方便，我们将该命令添加到 `package.json` 里面：
@@ -164,7 +164,7 @@ module.exports = CONFIG;
 }
 ```
 
-接下来我们执行命令 `npm run prod` 启动服务就能够看到输出的环境配置已经改变，端口变成了8000。我们来访问 http://localhost:8000/api ，浏览器正常显示页面。
+接下来我们执行命令 `npm run prod` 启动服务就能够看到输出的环境配置已经改变，端口变成了 `8000` 。我们来访问 http://localhost:8000/api ，浏览器正常显示页面。
 
 ```shell
 $ npm run prod
@@ -182,7 +182,7 @@ $ npm run prod
 
 大家已经注意到，在前面的配置中，我们的数据库密码是写在 `config` 里面的，我们不希望如此，为了安全起见，我们希望把密码配置在本地而不是提交到代码库或者仓库。因此，我们需要用到 [dotenv-safe](https://www.npmjs.com/package/dotenv-safe) 。
 
-dotenv-safe  让我们可以定义私有的变量，这是node进程运行时的变量而不是前面配置的环境变量。dotenv-safe 默认会从项目根目录的 `.env` 文件中加载配置，下面我们开始来实战。
+dotenv-safe  让我们可以定义私有的变量，这是 node 进程运行时的变量而不是前面配置的环境变量。dotenv-safe 默认会从项目根目录的 `.env` 文件中加载配置，下面我们开始来实战。
 
 在根目录新建一个 `.env` 文件，内容如下：
 
@@ -278,7 +278,7 @@ DB_PASSWORD=12345678
 服务已经启动，访问：http://localhost:8000/api
 ```
 
-我们可以看到，数据库的连接密码已经被  `.env` 修改为12345678 。通过这种方式，我们可以将服务器的一些配置抽离到 `.env` 文件：
+我们可以看到，数据库的连接密码已经被  `.env` 修改为 `12345678` 。通过这种方式，我们可以将服务器的一些配置抽离到 `.env` 文件：
 
 ```js
 // .env
@@ -306,7 +306,7 @@ DB_NAME=koaBlog
 }
 ```
 
-**记得移除引入的旧的config设置**
+**移除引入的旧的config设置**
 
 参考资料：[Maintain Multiple Environment Configurations and Secrets in Node.js Apps](https://blog.stvmlbrn.com/2018/01/13/maintain-multiple-configurations-and-secrets-in-node-apps.html)
 

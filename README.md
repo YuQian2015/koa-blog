@@ -21,3 +21,4 @@
 - 第三章 [日志](./docs/chapter-3/chapter-3.md)
 - 第四章 [MongoDB](./docs/chapter-4/chapter-4.md)
 - 第五章 [环境配置](./docs/chapter-5/chapter-5.md)
+- 第六章 [Mongoose](./docs/chapter-6/chapter-6.md)
