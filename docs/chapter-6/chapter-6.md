@@ -20,7 +20,6 @@ koa-blog
 │       └── index.html
 ├── app.js
 ├── config
-│   ├── config.js
 │   ├── custom-environment-variables.json
 │   ├── default.json
 │   └── production.json

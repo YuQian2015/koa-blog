@@ -2,8 +2,9 @@
 
 const log4js = require('log4js');
 
-const { LOG_CONFIG } = require('../../config/config'); //加载配置文件
-log4js.configure(LOG_CONFIG);
+const config = require('config'); // 引入config
+const log4jsConfig= config.get('Log4js');
+log4js.configure(log4jsConfig);
 
 let logFormat = {};
 

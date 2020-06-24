@@ -44,7 +44,7 @@ $ npm install config dotenv-safe --save
 
 {
     "App": {
-        "server": "0.0.0.0", // 所有ip可以访问
+        "ip": "0.0.0.0", // 所有ip可以访问
         "port": 3000 // 端口
     },
     "Router": {
@@ -56,9 +56,49 @@ $ npm install config dotenv-safe --save
         "host": "127.0.0.1",
         "dbName": "koaBlog", // MongoDB数据库名
         "port": 3001
+    },
+    "Log4js": {
+        "appenders": {
+            "error": {
+                "category": "errorLogger", //logger名称
+                "type": "dateFile", //日志类型
+                "filename": "logs/error/error", //日志输出位置
+                "alwaysIncludePattern": true, //是否总是有后缀名
+                "pattern": "yyyy-MM-dd-hh.log" //后缀，每小时创建一个新的日志文件
+            },
+            "response": {
+                "category": "resLogger",
+                "type": "dateFile",
+                "filename": "logs/response/response",
+                "alwaysIncludePattern": true,
+                "pattern": "yyyy-MM-dd-hh.log"
+            }
+        },
+        "categories": {
+            "error": {
+                "appenders": [
+                    "error"
+                ],
+                "level": "error"
+            },
+            "response": {
+                "appenders": [
+                    "response"
+                ],
+                "level": "info"
+            },
+            "default": {
+                "appenders": [
+                    "response"
+                ],
+                "level": "info"
+            }
+        }
     }
 }
 ```
+
+正如我们看到的，该文件以及包括了我们之前实战在  `config/config.js` 里面的设置。
 
 ### 使用运行环境
 
@@ -104,19 +144,29 @@ router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路�
 module.exports = router;
 ```
 
-当然，我们可以移除之前设置在 `config.js` 里面的路由前缀 `API_PREFIX` 。
+当然，我们可以移除之前创建的 `config/config.js` 文件 。
+
+我们接着来对 log 部分进行完善：
 
 ```diff
-// config.js
+// app/util/log_format.js
 
-const CONFIG = {
--    "API_PREFIX": "/api", // 配置了路由前缀
-    "LOG_CONFIG":
-        {
-        // ...
-        }
-};
-module.exports = CONFIG;
+const log4js = require('log4js');
+
++ const config = require('config'); // 引入config
++ const log4jsConfig= config.get('Log4js');
++ log4js.configure(log4jsConfig);
+- const { LOG_CONFIG } = require('../../config/config'); //加载配置文件
+- log4js.configure(LOG_CONFIG);
+
+let logFormat = {};
+
+let errorLogger = log4js.getLogger('error'); // categories的元素
+let resLogger = log4js.getLogger('response');
+
+// ...
+
+module.exports = logFormat;
 ```
 
 启动服务之后，我们就能看到命令行能够打印出 `config.json` 里面的 App 配置信息：
@@ -332,7 +382,6 @@ koa-blog
 │       └── index.html
 ├── app.js
 ├── config
-│   ├── config.js
 │   ├── custom-environment-variables.json
 │   ├── default.json
 │   └── production.json
@@ -340,4 +389,4 @@ koa-blog
 └── README.md
 ```
 
-下一步，我们来使用 MongoDB …
+下一步，我们来使用 mongoose 操作 MongoDB 插入一条数据，并且使用MVC（Model View Controller）规范进行开发…
