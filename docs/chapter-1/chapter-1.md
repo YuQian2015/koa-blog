@@ -6,7 +6,7 @@
 
 ### 技术和要点
 
-- 后端使用 Koa2 及其中间件、数据库使用 MongoDB、 前端使用 React+Redux+UI框架待定。
+- 后端使用 Koa2 及其中间件、数据库使用 MongoDB、 前端使用 React+Redux （具体待定）。
 - 要点：RESTful API、 JWT、 自动生成API文档、混合加密传输、访问权限控制、PM2等。
 
 ### 前期准备

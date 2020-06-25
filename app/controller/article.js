@@ -12,6 +12,7 @@ class ArticleController {
       });
       ctx.body = newArticle;
     } catch (err) {
+      console.log(err);
       ctx.body = err;
       throw new Error(err);
     }
