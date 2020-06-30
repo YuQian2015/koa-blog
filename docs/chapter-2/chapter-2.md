@@ -93,7 +93,7 @@ const fs = require('fs'); // 引入fs
 function readPage( page ) {
     return new Promise(( resolve, reject ) => {
         const viewUrl = `./app/view/${page}`;
-        fs.readFile(viewUrl, "binary", ( err, data ) => {
+        fs.readFile(viewUrl, 'utf8', ( err, data ) => {
             if ( err ) {
                 reject( err )
             } else {
@@ -167,7 +167,7 @@ const router = new Router();
 function readPage( page ) {
     return new Promise(( resolve, reject ) => {
         const viewUrl = `./app/view/${page}`;
-        fs.readFile(viewUrl, "binary", ( err, data ) => {
+        fs.readFile(viewUrl, 'utf8', ( err, data ) => {
             if ( err ) {
                 reject( err )
             } else {
@@ -253,7 +253,7 @@ const router = new Router();
 function readPage( page ) {
     return new Promise(( resolve, reject ) => {
         const viewUrl = `./app/view/${page}`;
-        fs.readFile(viewUrl, "binary", ( err, data ) => {
+        fs.readFile(viewUrl, 'utf8', ( err, data ) => {
             if ( err ) {
                 reject( err )
             } else {
