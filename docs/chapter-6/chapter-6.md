@@ -46,11 +46,11 @@ Koa 应用支持多款数据库，从而可以执行新建（**C**reate）、读
 $ npm install mongoose --save
 ```
 
-安装 Mongoose 会添加 MongoDB 包括数据库驱动程序在内的所有依赖项，再加上我们在前面的实战安装并设置好了 MongoDB ，我们现在可以直接使用 Mongoose 连接数据库。
+安装 Mongoose 会添加 MongoDB 包括数据库驱动程序在内的所有依赖项，再加上我们在前面的实战安装并设置好了 MongoDB ，现在可以直接使用 Mongoose 连接数据库。
 
 ### 连接MongoDB
 
-我们可以使用 `require()` 引入 `mongoose` ，并通过 `mongoose.connect()` 连接到本地数据库，但是为了方便管理，我们还是单独建立一个 `plugin.js` 文件，连接数据库：
+可以使用 `require()` 引入 `mongoose` ，并通过 `mongoose.connect()` 连接到本地数据库，但是为了方便管理，我们还是单独建立一个 `plugin.js` 文件，连接数据库：
 
 ```js
 // config/plugin.js
@@ -86,7 +86,7 @@ const dbConfig = config.get('Database');
 // ...
 ```
 
-我们启动服务 `npm start` 即可看到数据库连接成功：
+启动服务 `npm start` 即可看到数据库连接成功：
 
 ```shell
 服务已经启动，访问：http://localhost:3001/api
@@ -95,9 +95,9 @@ Mongoose连接到koaBlog
 
 ### 创建Schema
 
-我们数据库的模型使用 `Schema` 接口进行定义，在 mongoose 中，所有的东西都从 [Schema](http://www.nodeclass.com/api/mongoose.html#guide) 中衍生出来。 `Schema` 可以定义每个文档中存储的字段及字段的验证要求和默认值。
+数据库的模型使用 `Schema` 接口进行定义，在 mongoose 中，所有的东西都从 [Schema](http://www.nodeclass.com/api/mongoose.html#guide) 中衍生出来。 `Schema` 可以定义每个文档中存储的字段及字段的验证要求和默认值。
 
-我们先来定义一个Schema（模式），在 `app` 目录新建一个文件夹 `model` ，再在其中建一个文件 `article.js` ，我们准备通过它创建文章的模式 ：
+我们先来定义一个Schema（模式），在 `app` 目录新建一个文件夹 `model` ，再在其中建一个文件 `article.js` ，准备通过它创建文章的模式 ：
 
 ```js
 // app/model/article.js
@@ -135,13 +135,13 @@ ArticleSchema.pre('findOne', function () {
 });
 ```
 
-上面的代码片段中定义了一个简单的模式。首先引入 `mongoose` ，然后使用 `Schema` 构造器创建一个新的模式实例，使用构造器的对象参数定义各个**字段**、**类型**以及**默认值**。并且我们使用了 mongoose 提供的 `timestamps` 设置了**创建时间**和**修改时间**，以后我们创建和修改文档，这些时间会自动变更。
+上面的代码片段中定义了一个简单的模式。首先引入 `mongoose` ，然后使用 `Schema` 构造器创建一个新的模式实例，使用构造器的对象参数定义各个**字段**、**类型**以及**默认值**。并且使用了 mongoose 提供的 `timestamps` 设置了**创建时间**和**修改时间**，以后我们创建和修改文档，这些时间会自动变更。
 
 ### 创建Model
 
 定义模型（model）类后，可以使用它们来创建、更新或删除记录，以及通过查询来获取所有记录或特定子集。
 
-我们使用 `mongoose.model('集合别名'， 模式)` 方法从模式创建模型：
+使用 `mongoose.model('集合别名'， 模式)` 方法从模式创建模型：
 
 ```diff
 // app/model/article.js
@@ -166,7 +166,7 @@ ArticleSchema.pre('findOne', function () {
 
 ### 创建Service
 
-在上面的实战中，我们已经创建好了模型（model），接下来我们可以通过 `model` 实例调用 `save()` 来向数据库新增文档。这些方法都是 mongoose 提供给我们的。
+在上面的实战中，我们已经创建好了模型（model），接下可以通过 `model` 实例调用 `save()` 来向数据库新增文档。这些方法都是 mongoose 提供给的。
 
 为了方便以后抽出通用的方法操作（CRUD），这里新增一个通用的 service 来对模型进行调用。
 
@@ -207,7 +207,7 @@ class ArticleService extends Service {
 module.exports = new ArticleService();
 ```
 
-当然，还需要将 `service` 导出，以提供 `controller` 使用，因此在 `app/service` 目录创建 `index.js` 文件：
+当然，还需要将 `service` 导出，以提供 `controller` 使用，因此在 `app/service` 目录创建 `index.js` 文件，将目录里面的 service 都导出来：
 
 ```js
 // app/service/index.js
@@ -251,7 +251,9 @@ class ArticleController {
 module.exports = new ArticleController();
 ```
 
-上面的代码中，我们先固定创建一条数据，在 `ArticleController` 中，我们使用了 `service` 定义的 `create` 方法来向数据库创建记录，并且我们依照 ArticleSchema 定义的数据模型进行传参。接着，将 `ArticleController`  导出：
+上面的代码中，我们先固定的创建一条数据，`title` 、 `content` 、 `summary` 都是固定的值。
+
+`ArticleController` 使用了 `service` 定义的 `create` 方法来向数据库创建记录，并且我们依照 `ArticleSchema` 定义的数据模型进行传参。接着，将 `ArticleController`  导出：
 
 ```js
 // app/controller/index.js
@@ -290,15 +292,17 @@ router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路�
 module.exports = router;
 ```
 
-我们将路由的 `/article` 对应到了 `articleController` 的 `create` 方法，当我们重启服务之后，在浏览器访问： http://localhost:3000/api/article ，可以看到已经创建了一条数据。页面中显示的数据如：
+我们将路由的 `/article` 对应到了 `articleController` 的 `create` 方法，当重启服务之后，在浏览器访问： http://localhost:3000/api/article ，可以看到已经创建了一条数据。页面中显示的数据如：
 
 ```json
 {"status":1,"_id":"5ef204b5b40da108dc47ae30","title":"第一条数据","content":"从零开始的koa实战","summary":"实战","createDate":"2020-06-23T13:33:41.858Z","updateDate":"2020-06-23T13:33:41.858Z","__v":0}
 ```
 
-到这里，我们已经能够通过请求对MongoDB数据库进行数据插入，以后我们还将继续完善各项逻辑。
+到这里，我们已经能够通过请求对MongoDB数据库进行数据插入，以后还将继续完善各项逻辑。
 
 
 参考资料：
 
-https://developer.mozilla.org/zh-CN/docs/learn/Server-side/Express_Nodejs/mongoose
+https://developer.mozilla.org/zh-CN/docs/learn/Server-side/Express_Nodejs/mongoose 。
+
+下一步，我们来以RESTful风格设计一个接口，使用postman来调用，从而提供用户注册API。

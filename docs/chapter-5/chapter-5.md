@@ -21,7 +21,7 @@ koa-blog
 └── package.json
 ```
 
-为了让我们的项目支持不同的开发环境配置，我们将使用以下两个包：
+为了让项目支持不同的开发环境配置，我们将使用以下两个包：
 
 
 - [config ](https://www.npmjs.com/package/config)  - 用来管理不同的运行环境
@@ -35,7 +35,7 @@ $ npm install config dotenv-safe --save
 
 ### 配置运行环境
 
- [config ](https://www.npmjs.com/package/config) 会默认去查看项目根目录的 `config` 文件夹，所以我们需要创建一个 `config` 目录，这个在之前的实战已经做了。
+ [config ](https://www.npmjs.com/package/config) 会默认去查看项目根目录的 `config` 文件夹，所以需要创建一个 `config` 目录，这个在之前的实战已经做了。
 
 接着，来创建一个默认的配置文件 `default.json` ，其中包含了我们的数据库设置以及服务的启动设置。以本项目为例，配置如下：
 
@@ -98,11 +98,11 @@ $ npm install config dotenv-safe --save
 }
 ```
 
-正如我们看到的，该文件以及包括了我们之前实战在  `config/config.js` 里面的设置。
+代码里面的配置包括了 `config/config.js` 里面的所有配置信息。
 
 ### 使用运行环境
 
-在前面的代码中，我们配置了应用的设置 `App` 以及数据库连接配置 `Database`，在项目的任何地方需要使用这些配置时，我们只需要引用 `config` 就可以了，如：
+在前面的代码中配置了应用的设置 `App` 以及数据库连接配置 `Database`，在项目的任何地方需要使用这些配置时，只需要引用 `config` 就可以了，如：
 
 ```js
 // app.js
@@ -144,9 +144,7 @@ router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路�
 module.exports = router;
 ```
 
-当然，我们可以移除之前创建的 `config/config.js` 文件 。
-
-我们接着来对 log 部分进行完善：
+当然，我们可以移除之前创建的 `config/config.js` 文件，接着来对 `log` 配置部分进行完善：
 
 ```diff
 // app/util/log_format.js
@@ -173,14 +171,15 @@ module.exports = logFormat;
 
 ```shell
 { server: '0.0.0.0', port: 3000 }
-服务已经启动，访问：http://localhost:3000//api
+服务已经启动，访问：http://localhost:3000/api
 ```
 
 ### 配置多个环境
 
-经过上面的介绍，我们已经通过 config 来配置运行环境了，但仅是这样我们并不能实现多个环境的配置，因此，现在我们来配置一个新的环境。
+> 经过上面的介绍，我们已经通过 config 来配置运行环境了，但仅是这样并不能实现多个环境的配置，我们需要再配置一个新的环境。
+>
 
-接下来，配置一个生产环境（production），我们需要在 `config` 目录新建一个 `production.json` 文件：
+接下来，配置一个生产环境（production），需要在 `config` 目录新建一个 `production.json` 文件：
 
 ```js
 // config/production.json
@@ -192,16 +191,16 @@ module.exports = logFormat;
 }
 ```
 
-我们并没有配置所有的变量，而是希望一些变量保持和默认配置一样，如服务启动的地址、数据库名称等等。
+这里并没有配置所有的变量，而是希望一些变量保持和默认配置一样，如服务启动的地址、数据库名称等等。
 
-为了验证配置是否生效，我们来切换到production环境：
+为了验证配置是否生效，需要切换到 `production` 环境：
 
 ```shell
 'export NODE_ENV=production' // Linux
 'set NODE_ENV=production' // Windows
 ```
 
-同样，为了方便，我们将该命令添加到 `package.json` 里面：
+同样，为了方便，可以将该命令添加到 `package.json` 里面：
 
 ```json
 {
@@ -214,7 +213,7 @@ module.exports = logFormat;
 }
 ```
 
-接下来我们执行命令 `npm run prod` 启动服务就能够看到输出的环境配置已经改变，端口变成了 `8000` 。我们来访问 http://localhost:8000/api ，浏览器正常显示页面。
+接下来执行命令 `npm run prod` 启动服务就能够看到输出的环境配置已经改变，端口变成了 `8000` 。访问 http://localhost:8000/api ，浏览器正常显示页面。
 
 ```shell
 $ npm run prod
@@ -226,13 +225,14 @@ $ npm run prod
 服务已经启动，访问：http://localhost:8000/api
 ```
 
-事实上，当我们调用 `config.get('App') ` 时，会从对应环境的 `json` 文件去取值替换 `default.json` 对应的值。若需要支持更多的运行环境，我们只需要新增其它的文件就行，如 `staging.json` 、 `qa.json`  等。
+> 事实上，当调用 `config.get('App') ` 时，会从对应环境的 `json` 文件去取值替换 `default.json` 对应的值。若需要支持更多的运行环境，我们只需要新增其它的文件就行，如 `staging.json` 、 `qa.json`  等。
+>
 
 ### 配置环境变量
 
-大家已经注意到，在前面的配置中，我们的数据库密码是写在 `config` 里面的，我们不希望如此，为了安全起见，我们希望把密码配置在本地而不是提交到代码库或者仓库。因此，我们需要用到 [dotenv-safe](https://www.npmjs.com/package/dotenv-safe) 。
+大家已经注意到，在前面的配置中，数据库密码是写在 `config` 里面的，为了安全起见，我们希望把密码配置在本地而不是提交到代码库或者仓库。因此，我们需要用到 [dotenv-safe](https://www.npmjs.com/package/dotenv-safe) 。
 
-dotenv-safe  让我们可以定义私有的变量，这是 node 进程运行时的变量而不是前面配置的环境变量。dotenv-safe 默认会从项目根目录的 `.env` 文件中加载配置，下面我们开始来实战。
+dotenv-safe  可以定义私有的变量，这是 node 进程运行时的变量而不是前面配置的环境变量。dotenv-safe 默认会从项目根目录的 `.env` 文件中加载配置，下面来看看具体操作。
 
 在根目录新建一个 `.env` 文件，内容如下：
 
@@ -240,7 +240,7 @@ dotenv-safe  让我们可以定义私有的变量，这是 node 进程运行时�
 DB_PASSWORD=123456
 ```
 
-我们把数据库密码抽离了出来，并且我们会在 `.gitignore` 文件中忽略掉这个文件：
+上面代码把数据库密码抽离了出来，并且我们会在 `.gitignore` 文件中忽略掉这个文件：
 
 ```diff
 node_modules/
@@ -251,13 +251,13 @@ logs/
 
 这样就不会提交到仓库了。
 
-接下来我们新建一个 `.env.example` 文件用来提交到代码库，这个文件没有对变量进行赋值，但是能够表明项目使用的配置。并且，如果这个文件里面定义了 `.env` 没有的值，程序将停止执行。 `.env.example` 的内容：
+接下来我们新建一个 `.env.example` 文件用来提交到代码库，这个文件没有对变量进行赋值，但是能够表明项目使用的配置，注意一来，其他开发者可以根据这里面的内容设置自己的项目环境。**如果这个文件里面定义了 `.env` 没有的值，程序将停止执行。** `.env.example` 的内容：
 
 ```
 DB_PASSWORD=
 ```
 
-然后我们在 `app.js` 里面优先引入来进行使用：
+然后在 `app.js` 里面优先引入来进行使用：
 
 ```diff
 + require('dotenv-safe').config(); // 只需要引入一次
@@ -279,9 +279,9 @@ console.log(appConfig); // 输出获取的 appConfig
 服务已经启动，访问：http://localhost:8000/api
 ```
 
-### 使用环境变量
+### 使用.env环境变量
 
-接下来，我们将使用定义好的变量来替换 `config` 里面的配置。我们在 `config` 目录新增一个文件 `custom-environment-variables.json`：
+接下来，我们将使用定义好的变量来替换 `config` 里面的配置。我们在 `config` 目录新增一个文件 `custom-environment-variables.json` ：
 
 ```js
 {
@@ -291,9 +291,9 @@ console.log(appConfig); // 输出获取的 appConfig
 }
 ```
 
-这个 `json` 文件里面我们对数据库的密码进行了定义，当我们执行 `config.get('Database.password')` 时， `config` 将去查询一个叫 “DB_PASSWORD” 的环境变量。如果查询不到就会使用匹配当前 node 环境的 json 文件的值，如果当前 node 环境的值任然没有设置，就会去查询 `default.json` 里面设置的默认值 。
+这个 `json` 文件里面我们对数据库的密码进行了定义，当执行 `config.get('Database.password')` 时， `config` 将去查询一个叫 “DB_PASSWORD” 的环境变量。如果查询不到就会使用匹配当前 node 环境的 json 文件的值，如果当前 node 环境的值任然没有设置，就会去查询 `default.json` 里面设置的默认值 。
 
-我们再看修改 `app.js` 验证是否有效：
+验证 `app.js` 验证是否有效：
 
 ```diff
 require('dotenv-safe').config(); // 只需要引入一次
@@ -309,7 +309,7 @@ console.log(appConfig); // 输出获取的 appConfig
 // ...
 ```
 
-我们修改 `.env` 里面的值来启动服务查看是否生效：
+修改 `.env` 里面的值来启动服务查看是否生效：
 
 ```
 DB_PASSWORD=12345678
@@ -328,7 +328,7 @@ DB_PASSWORD=12345678
 服务已经启动，访问：http://localhost:8000/api
 ```
 
-我们可以看到，数据库的连接密码已经被  `.env` 修改为 `12345678` 。通过这种方式，我们可以将服务器的一些配置抽离到 `.env` 文件：
+我们可以看到，数据库的连接密码已经被  `.env` 修改为 `12345678` 。通过这种方式，可以将服务器的一些配置抽离到 `.env` 文件：
 
 ```js
 // .env
@@ -339,6 +339,15 @@ DB_HOST=127.0.0.1
 DB_PORT=3001
 DB_USER=moyufed
 DB_NAME=koaBlog
+
+// .env.example
+APP_IP=
+APP_PORT=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_NAME=
 
 // config/custom-environment-variables.json
 {

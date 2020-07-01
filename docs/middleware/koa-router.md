@@ -146,7 +146,7 @@ app.use(router.routes());
 可以通过调用 `router.prefix(prefix)` 来设置路由的前缀，也可以通过实例化路由的时候传递参数设置路由的前缀，比如在 RESTful 接口里面，往往会为接口设置一个 `api` 前缀，如：
 
 ```js
-router.prefix('/things/:thing_id')
+router.prefix('/api')
 
 // 或者
 const router = new Router({
@@ -244,7 +244,7 @@ router.get('/', async (ctx) => {
     ctx.body = '<h1>hello world!</h1>';
 })
 
-router.use('/user', user.routes()).use(user.allowedMethods());
+router.use('/user', user.routes(), user.allowedMethods());
 
 module.exports = router;
 ```
