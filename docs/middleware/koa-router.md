@@ -176,7 +176,78 @@ forums.use('/forums/:fid/posts', posts.routes(), posts.allowedMethods());
 app.use(forums.routes());
 ```
 
-因此可以对路由进行拆分，不同的模块使用不同的文件。
+#### 拆分路由
+
+通过路由嵌套可以对路由进行拆分，不同的模块使用不同的文件，如下面的示例：
+
+`app.js` 只引入路由入口文件
+
+```diff
+const Koa = require('koa'); // 引入koa
++ const router = require('./router');
+
+const app = new Koa(); // 创建koa应用
+
++ app.use(router.routes());
++ app.use(router.allowedMethods());
+
+// 启动服务监听本地3000端口
+app.listen(3000, () => {
+    console.log('应用已经启动，http://localhost:3000');
+})
+```
+
+`router/user.js` 设置了 `user` 模块的路由，并且导出：
+
+```js
+const Router = require('koa-router');
+
+const router = new Router();
+
+router.get("/", async (ctx) => {
+    console.log('查询参数', ctx.query);
+    ctx.body = '获取用户列表';
+})
+    .get("/:id", async (ctx) => {
+        const { id } = ctx.params
+        ctx.body = `获取id为${id}的用户`;
+    })
+    .post("/", async (ctx) => {
+        ctx.body = `创建用户`;
+    })
+    .put("/:id", async (ctx) => {
+        const { id } = ctx.params
+        ctx.body = `修改id为${id}的用户`;
+    })
+    .del("/:id", async (ctx) => {
+        const { id } = ctx.params
+        ctx.body = `删除id为${id}的用户`;
+    })
+    .all("/users/:id", async (ctx) => {
+        ctx.body = ctx.params;
+    });
+
+module.exports = router;
+```
+
+`router/index.js` 导出了整个路由模块：
+
+```js
+const Router = require('koa-router');
+const user = require('./user');
+
+const router = new Router();
+
+// 指定一个url匹配
+router.get('/', async (ctx) => {
+    ctx.type = 'html';
+    ctx.body = '<h1>hello world!</h1>';
+})
+
+router.use('/user', user.routes()).use(user.allowedMethods());
+
+module.exports = router;
+```
 
 ### 笔记
 

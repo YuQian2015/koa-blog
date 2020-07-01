@@ -11,7 +11,7 @@
 
 ### 前期准备
 
-为了更好的使用 `async/await` ，我们选择 **7.6.0** 以上的 node.js 环境，当然，我们可以使用 nvm 来管理多版本node.js（这里不作介绍）。安装好 node.js ，检查版本：
+为了更好的使用 `async/await` ，我们选择 **7.6.0** 以上的 node.js 环境，也可以使用 nvm 来管理多版本node.js（这里不作介绍）。安装好 node.js ，检查版本：
 
 ```shell
 $ node -v
@@ -38,7 +38,7 @@ $ npm init -y
 $ npm install koa --save
 ```
 
-执行完上面的命令之后，我们得到了下面的目录结构：
+执行完上面的命令之后，得到了下面的目录结构：
 
 ```
 koa-blog
@@ -97,3 +97,7 @@ App started on http://localhost:3000
 以后只要在命令行执行 `npm start` 即可启动服务。
 
 下一步，我们来实现路由…
+
+
+
+> 本实战代码已经创建了GitHub仓库：https://github.com/YuQian2015/koa-blog ，欢迎关注。

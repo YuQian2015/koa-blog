@@ -12,7 +12,7 @@ koa-blog
 
 ### Koa原生路由实现
 
-#### 查看路由信息
+#### 查看url信息
 
 首先，通过 `ctx.request.url` 获取到当前请求的地址：
 
@@ -23,7 +23,7 @@ const app = new Koa();
 
 // 响应
 app.use(ctx => {
-    const {url} = ctx.request;
+    const { url } = ctx.request;
     ctx.response.body = url;
 });
 
@@ -56,9 +56,9 @@ const main = ctx => {
 
 *可以使用 `acceptsEncodings` 设置接收返回的编码，`acceptsCharsets` 设置接收返回的字符集，`acceptsLanguages` 设置接收返回的语言。*
 
-#### 通过路由控制页面访问
+#### 控制页面访问
 
-接下来我们通过对路由地址进行判断，并取到对应的HTML页面返回到浏览器显示。
+接下来我们通过对请求地址进行判断，并取到与之相对应的HTML页面返回到浏览器显示。因此，这里将建立几个HTML文件，把它们放在 `app/view/` 目录里面。
 
 首先，新建 HTML 文件如下：
 
@@ -76,14 +76,36 @@ const main = ctx => {
 <a href="home">home</a>
 ```
 
-接着，我们需要读取 HTML 文件，约定 HTML 都在 `app/view/` 目录，然后从这个目录读取页面，并且返回到浏览器显示：
+接着使用 Node.js 的文件系统实现HTML的读取，具体代码如下：
+
+```js
+/**
+ * 从app/view目录读取HTML文件
+ * @param {string} page 路由指向的页面
+ * @returns {Promise<any>}
+ */
+function readPage( page ) {
+    return new Promise(( resolve, reject ) => {
+        const viewUrl = `./app/view/${page}`;
+        fs.readFile(viewUrl, 'utf8', ( err, data ) => {
+            if ( err ) {
+                reject( err )
+            } else {
+                resolve( data )
+            }
+        })
+    })
+}
+```
+
+我们读取了创建在 `app/view/` 目录的 HTML 之后，通过判断请求的 `url` ，选择对应的页面进行返回到浏览器显示，完整代码：
 
 ```js
 // app.js
 const Koa = require('koa');
-const app = new Koa();
-
 const fs = require('fs'); // 引入fs
+
+const app = new Koa();
 
 /**
  * 从app/view目录读取HTML文件
@@ -132,11 +154,11 @@ app.listen(3000, () => {
 
 然后我们启动服务，在浏览器访问 http://localhost:3000/index ，我们可以看到页面已经显示出来，点击里面的连接，就能够切换不同的页面。
 
-
-
 ### 使用koa-router
 
 *从上面的实战可以看到，要针对不同的访问返回不同的内容，我们需要先获取请求的 url，以及请求的类型，再进行相应的处理，最后返回结果，考虑到使用原生路由处理请求会很繁琐，我们使用 [koa-router](https://github.com/alexmingoia/koa-router) 中间件来管理项目路由。*
+
+这里有比较详细的 `koa-router` 中间件使用指南： [Koa中间件使用之koa-router](../middleware/koa-router.md) 。
 
 #### 安装和使用
 
@@ -151,12 +173,10 @@ $ npm install koa-router --save
 ```js
 // app.js
 const Koa = require('koa');
-const app = new Koa();
-
 const fs = require('fs'); // 引入fs
+const Router = require('koa-router'); // 引入koa-router
 
-// 引入koa-router
-const Router = require('koa-router');
+const app = new Koa();
 const router = new Router();
 
 /**
@@ -215,7 +235,7 @@ router.get('/index', index);
 router.get('/home', home);
 
 // 使用中间件 处理404
-router.use(async (ctx, next) => {
+app.use(async (ctx, next) => {
     await next(); // 调用next执行下一个中间件
     if(ctx.status === 404) {
         ctx.response.type = 'html';
@@ -235,7 +255,7 @@ app.listen(3000, () => {
 
 #### 单独管理路由
 
-考虑到以后项目会复杂很多，我们把路由独立出来管理：
+从上面的实战可以看到，我们在 ` app.js` 的代码显得非常臃肿，考虑到以后项目会复杂很多，那样我们的代码将变得难以维护，因此下面来把路由独立出来，放在单独的文件夹管理：
 
 ```js
 // app/router/index.js
