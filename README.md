@@ -23,6 +23,10 @@
 - 第五章 [环境配置](./docs/chapter-5/chapter-5.md)
 - 第六章 [插入数据](./docs/chapter-6/chapter-6.md)
 
+### 中间件使用
+
+- [Koa中间件使用之koa-router](./docs/middleware/koa-router.md)
+
 ### 基础知识
 
 #### 什么是koa
