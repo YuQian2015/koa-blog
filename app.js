@@ -6,6 +6,7 @@ const config = require('config'); // 引入config
 const appConfig = config.get('App'); // 直接使用 config 获取App的配置
 const apiPrefix = config.get('Router.apiPrefix'); // 可以通过Router.apiPrefix获取具体的值
 const dbConfig = config.get('Database');
+const bodyParser = require('koa-bodyparser');
 const { mongooseConnect } = require('./config/plugin');
 mongooseConnect();
 
@@ -32,6 +33,7 @@ app.use(koaNunjucks({
 }));
 
 app.use(logger()); // 处理log的中间件
+app.use(bodyParser());
 app.use(responseHandler()); // 处理响应的中间件
 
 // 使用中间件 处理404

@@ -230,7 +230,7 @@ config/errorCode.json
 
 ### 注册接口
 
-为了实现用户注册，我们需要新增一个用户 model ，在 `app/model` 目录下新增一个 `user.js` ：
+为了实现用户注册，我们需要新增一个用户的集合，这里创建 `user` 模型，在 `app/model` 目录下新增一个 `user.js` ：
 
 ```js
 // app/model/user.js
@@ -260,6 +260,92 @@ const UserSchema = new Schema({
 });
 
 module.exports = mongoose.model('User', UserSchema);
+```
+
+mongoose 对 `Schema` 的定义可以设置类型、验证条件、是否必填等，定义好 model 之后，可以在 `service` 里面用来操作集合。
+
+因此再去新建对应的 service ，根据前面的实战，这里代码如下：
+
+```js
+// app/service/user.js
+
+const userModel = require('../model/user');
+const Service = require('./base');
+
+class UserService extends Service {
+    constructor() {
+        super(userModel)
+    }
+    // ...
+}
+
+module.exports = new UserService();
+
+
+
+// app/service/index.js
+
+const article = require('./article');
+const user = require('./user');
+
+module.exports = {
+    article, user
+};
+```
+
+接下来就需要将在 `controller` 中将方法指定到 `service` 的用户创建逻辑，比如：
+
+```js
+// app/controller/user.js
+
+const { user } = require("../service"); // 引入service
+
+class UserController {
+  async create(ctx) {
+    try {
+      const { email, password, name } = ctx.body;
+      const newUser = await user.create({
+        email, password, name
+      });
+      ctx.setResponse({ data: newUser });
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  }
+}
+
+module.exports = new UserController();
+
+
+
+// app/controller/index.js
+
+const article = require('./article');
+const user = require('./user');
+
+module.exports = {
+  article, user,
+};
+```
+
+由于需要获取 `POST` 请求`body` 里面的 JSON 数据，还需要用到 [koa-bodyparser](https://github.com/koajs/bodyparser) ，koa-bodyparser 支持 `json`, `form` 和 `text` 类型的 body 数据。安装 koa-bodyparser：
+
+```shell
+$ npm install koa-bodyparser --save
+```
+
+使用：
+
+```js
+const Koa = require('koa');
+const bodyParser = require('koa-bodyparser');
+
+const app = new Koa();
+// ...
+app.use(logger());
+app.use(bodyParser());
+// ...
 ```
 
 为了便于逻辑控制，我们将注册用户的操作放到单独的文件中进行，新增目录 controllers ，并在其中新增 index.js 文件和 user.js 文件。
