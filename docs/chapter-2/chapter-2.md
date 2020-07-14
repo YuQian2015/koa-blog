@@ -330,7 +330,7 @@ app.listen(3000, () => {
 
 #### 使用模板引擎
 
-为了便于读取模板和渲染页面，我们将使用中间件 [koa-nunjucks-2](https://www.npmjs.com/package/koa-nunjucks-2) 来作为模板引擎。
+为了便于读取模板和渲染页面，我们将使用中间件 [koa-nunjucks-2](https://www.npmjs.com/package/koa-nunjucks-2) 来作为模板引擎，这里有比较详细的 `koa-nunjucks-2` 中间件使用指南： [Koa中间件使用之koa-nunjucks-2](../middleware/koa-nunjucks-2.md) 。
 
 首先安装 koa-nunjucks-2 :
 

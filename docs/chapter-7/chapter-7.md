@@ -98,8 +98,6 @@ https://example.com/api/v1/tags
 }
 ```
 
-
-
 ### 响应格式处理
 
 在 utils 目录新建 response.js ，在 config 目录新建 errorCode.json。

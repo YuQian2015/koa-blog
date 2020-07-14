@@ -26,6 +26,7 @@
 ### 中间件使用
 
 - [Koa中间件使用之koa-router](./docs/middleware/koa-router.md)
+- [Koa中间件使用之koa-nunjucks-2](./docs/middleware/koa-nunjucks-2.md)
 
 ### 基础知识
 
