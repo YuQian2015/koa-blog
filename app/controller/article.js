@@ -10,9 +10,8 @@ class ArticleController {
         content: "从零开始的koa实战",
         summary: "实战"
       });
-      ctx.body = newArticle;
+      ctx.setResponse({ data: newArticle });
     } catch (err) {
-      console.log(err);
       ctx.body = err;
       throw new Error(err);
     }

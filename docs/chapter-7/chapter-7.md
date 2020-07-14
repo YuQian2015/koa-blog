@@ -1,5 +1,7 @@
 *我们使用 RESTful 的风格设计一个接口，方便前后端进行通信，实现前后端分离。*
 
+在开始实战之前，先来了解一下 RESTful API 。
+
 ### RESTful API 设计
 
 #### 域名相关
@@ -98,7 +100,88 @@ https://example.com/api/v1/tags
 }
 ```
 
-### 响应格式处理
+经过简单介绍，现在开始来进行实战。
+
+### 使用中间件统一响应格式
+
+先来新增一个中间件 `app/middleware/response_handler.js` ，在里面导出一个用于格式化响应的方法：
+
+```js
+// app/middleware/response_handler.js
+
+module.exports = () => {
+    // 导出一个方法
+    return async (ctx, next) => {
+        // 为ctx增加一个setResponse函数用于设置响应
+        ctx['setResponse'] = async ({ data = {}, code = 200 }) => {
+            ctx.type = 'json';
+            if (code === 200) {
+                ctx.body = {
+                    success: true,
+                    message: "",
+                    data,
+                    code,
+                };
+            }
+        };
+        await next();
+    };
+};
+```
+
+可以看到当在使用该中间件时，会自动给上下文 `ctx` 添加一个 `function` ，因此在需要响应数据的地方调用 `ctx.setResponse()` 就可以实现 JSON 数据响应。下面来看看如何使用：
+
+```diff
+// app.js
+
+// ...
+
+// 引入logger
+const logger = require('./app/middleware/logger');
++ const responseHandler = require('./app/middleware/response_handler');
+
+// ...
+
+app.use(logger()); // 处理log的中间件
++ app.use(responseHandler()); // 处理响应的中间件
+
+// ...
+```
+
+在需要进行响应的地方调用，比如将之前写的创建文章接口进行修改
+
+```diff
+// app/controller/article.js
+
+const { article } = require("../service"); // 引入service
+
+class ArticleController {
+  async create(ctx) {
+    try {
+      const newArticle = await article.create({
+        title: "第一条数据",
+        content: "从零开始的koa实战",
+        summary: "实战"
+      });
++       ctx.setResponse({ data: newArticle });
+-       ctx.body = newArticle;
+    } catch (err) {
+      ctx.body = err;
+      throw new Error(err);
+    }
+  }
+}
+
+module.exports = new ArticleController();
+```
+
+重启服务之后，再次访问 http://localhost:3000/api/article ，可以得到如下结果
+
+```json
+{"success":true,"message":"","data":{"status":1,"_id":"5f0d84f85064d0234406383e","title":"第一条数据","content":"从零开始的koa实战","summary":"实战","createDate":"2020-07-14T10:12:08.875Z","updateDate":"2020-07-14T10:12:08.875Z","__v":0},"code":200}
+```
+
+正好是需要的响应格式。
 
 在 utils 目录新建 response.js ，在 config 目录新建 errorCode.json。
 
@@ -147,82 +230,36 @@ config/errorCode.json
 
 ### 注册接口
 
-为了实现用户注册，我们需要新增一个用户 model ，在 models 目录下新增一个 user.js ，并且在 model 的index.js 引入。
-
-models/user.js
+为了实现用户注册，我们需要新增一个用户 model ，在 `app/model` 目录下新增一个 `user.js` ：
 
 ```js
+// app/model/user.js
+
+// 引入 Mongoose
 const mongoose = require('mongoose');
+
 const Schema = mongoose.Schema;
+const UserSchema = new Schema({
+    uid: { // 用户ID
+        type: String,
+        required: true
+    },
+    email: String, // 用户邮箱
+    password: String, // 用户密码
+    name: String,
+    avatarUrl: String,  // 用户头像
+    sex: {
+        type: Number,
+        default: 0
+    }, // 性别 0未设置 1男 2女
+}, {
+    timestamps: { // 使用时间戳
+        createdAt: 'createDate', // 将创建时间映射到createDate
+        updatedAt: 'updateDate' // 将修改时间映射到updateDate
+    }
+});
 
-// 创建一个User model，包含用户新增的字段定义
-let userModel = mongoose.model('User', new Schema({
-  userNo: String,
-  email: String,
-  password: String,
-  name: String,
-  sex: Number,
-  userType: String,
-  avatar: String,
-  createDate: Date
-}));
-
-// 新增一个用户class
-class User {
-  constructor() {
-    this.users = userModel;
-    this.find = this.find.bind(this); // 绑定上下文
-    this.create = this.create.bind(this);
-  }
-
-  // 查询用户
-  find(dataArr = {}) {
-    return new Promise((resolve, reject) => {
-
-      // 上面绑定了上下文，这里使用this.users
-      this.users.find(dataArr, (err, docs) => { // 查询
-        if (err) {
-          console.log(err);
-          reject(err);
-        } else {
-          resolve(docs);
-        }
-      })
-    })
-  }
-
-  // 创建用户
-  create(dataArr) {
-    return new Promise((resolve, reject) => {
-      let users = new this.users(dataArr);
-      users.save((err, data) => {
-        if (err) {
-          console.log(err)
-          reject(err);
-          return
-        }
-        console.log('创建用户成功');
-        resolve(data)
-      });
-    })
-  }
-}
-const user = new User()
-
-module.exports = user;
-
-```
-
-然后在models/index.js 引入user model
-
-```js
-const material = require('./material');
-const user = require('./user');
-
-module.exports = {
-  material,
-  user
-};
+module.exports = mongoose.model('User', UserSchema);
 ```
 
 为了便于逻辑控制，我们将注册用户的操作放到单独的文件中进行，新增目录 controllers ，并在其中新增 index.js 文件和 user.js 文件。
