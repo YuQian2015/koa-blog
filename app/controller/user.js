@@ -5,15 +5,13 @@ const { user } = require("../service"); // 引入service
 class UserController {
   async create(ctx) {
     try {
-      console.log(ctx);
-      
-      const { email, password, name } = ctx.request.body;
+      const { email, password, name, sex } = ctx.request.body;
       const newUser = await user.create({
-        email, password, name
+        email, password, name, sex
       });
-      ctx.setResponse({ data: newUser });
+      ctx.setResponse(newUser);
     } catch (err) {
-      console.log(err);
+      ctx.status = 400;
       throw new Error(err);
     }
   }

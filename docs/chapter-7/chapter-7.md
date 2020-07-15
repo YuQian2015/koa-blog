@@ -57,7 +57,7 @@ https://example.com/api/v1/tags
 - ?sortby=name&order=asc：指定返回结果按照哪个属性排序，以及排序顺序。
 - ?animal_type_id=1：指定筛选条件
 
-### 状态码
+#### 状态码
 
 服务器向用户返回的状态码和提示信息，常见的有以下一些（方括号中是该状态码对应的HTTP动词）：
 
@@ -89,7 +89,9 @@ https://example.com/api/v1/tags
 }
 ```
 
-当请求处理成功时，`success` 为 `true` ，如果状态码是 `4xx`，应向用户返回出错信息，为了前端可以统一处理响应，这里可以返回如下：
+当请求处理成功时，`success` 为 `true` ，如果状态码是 `4xx`，应向用户返回出错信息，比如客户端发送了错误的请求，可以响应一个 `400` 状态码和错误描述。
+
+为了前端可以统一处理响应，这里可以返回如下：
 
 ```json
 {
@@ -100,9 +102,9 @@ https://example.com/api/v1/tags
 }
 ```
 
-经过简单介绍，现在开始来进行实战。
+了解 RESTful API 设计的风格，下面开始来进行实战。
 
-### 使用中间件统一响应格式
+### 响应格式统一
 
 先来新增一个中间件 `app/middleware/response_handler.js` ，在里面导出一个用于格式化响应的方法：
 
@@ -112,24 +114,34 @@ https://example.com/api/v1/tags
 module.exports = () => {
     // 导出一个方法
     return async (ctx, next) => {
-        // 为ctx增加一个setResponse函数用于设置响应
-        ctx['setResponse'] = async ({ data = {}, code = 200 }) => {
-            ctx.type = 'json';
-            if (code === 200) {
+        try {
+            // 为ctx增加一个setResponse函数用于设置响应数据
+            ctx['setResponse'] = async (data = {}) => {
+                ctx.type = 'json';
                 ctx.body = {
                     success: true,
                     message: "",
                     data,
-                    code,
+                    code: 200,
+                };
+            };
+            await next();
+        } catch (err) {
+            // 4xx的错误返回给客户端
+            if (ctx.status >= 400 && ctx.status < 500) {
+                ctx.body = {
+                    success: false,
+                    message: err.message,
+                    data: {},
+                    code: ctx.status,
                 };
             }
-        };
-        await next();
+        }
     };
 };
 ```
 
-可以看到当在使用该中间件时，会自动给上下文 `ctx` 添加一个 `function` ，因此在需要响应数据的地方调用 `ctx.setResponse()` 就可以实现 JSON 数据响应。下面来看看如何使用：
+可以看到当在使用该中间件时会自动给上下文 `ctx` 添加一个 `function` ，在需要响应数据的地方调用 `ctx.setResponse()` 就可以实现 JSON 数据响应。使用中间件：
 
 ```diff
 // app.js
@@ -148,7 +160,7 @@ app.use(logger()); // 处理log的中间件
 // ...
 ```
 
-在需要进行响应的地方调用，比如将之前写的创建文章接口进行修改
+在需要进行响应的地方调用，比如之前写的创建文章接口
 
 ```diff
 // app/controller/article.js
@@ -163,10 +175,9 @@ class ArticleController {
         content: "从零开始的koa实战",
         summary: "实战"
       });
-+       ctx.setResponse({ data: newArticle });
--       ctx.body = newArticle;
+      ctx.setResponse(newArticle);
     } catch (err) {
-      ctx.body = err;
+      ctx.status = 400;
       throw new Error(err);
     }
   }
@@ -175,46 +186,13 @@ class ArticleController {
 module.exports = new ArticleController();
 ```
 
-重启服务之后，再次访问 http://localhost:3000/api/article ，可以得到如下结果
+重启服务之后，再次访问 http://localhost:3000/api/article ，可以得到如下结果，正好是需要的响应格式：
 
 ```json
 {"success":true,"message":"","data":{"status":1,"_id":"5f0d84f85064d0234406383e","title":"第一条数据","content":"从零开始的koa实战","summary":"实战","createDate":"2020-07-14T10:12:08.875Z","updateDate":"2020-07-14T10:12:08.875Z","__v":0},"code":200}
 ```
 
-正好是需要的响应格式。
-
-在 utils 目录新建 response.js ，在 config 目录新建 errorCode.json。
-
-utils/response.js
-
-```js
-const errorCode = require('./errorCode');
-// 对响应数据进行规范，如果传递的对象有errorCode，返回报错信息
-module.exports = (response) => {
-  const {errorCode, data, msg} = response;
-  if (errorCode) {
-    return {
-      "error": true,
-      "msg": msg
-        ? msg
-        : errorCode[response.errorCode],
-      "data": {},
-      "errorCode": errorCode
-    }
-  }
-  if (data) {
-    return {
-      "error": false,
-      "msg": msg
-        ? msg
-        : "",
-      "data": data,
-      "errorCode": ""
-    }
-  }
-};
-
-```
+那错误的请求会怎么响应？这将在接下来的实战中进行验证。
 
 config/errorCode.json
 
@@ -230,6 +208,8 @@ config/errorCode.json
 
 ### 注册接口
 
+#### model
+
 为了实现用户注册，我们需要新增一个用户的集合，这里创建 `user` 模型，在 `app/model` 目录下新增一个 `user.js` ：
 
 ```js
@@ -237,20 +217,16 @@ config/errorCode.json
 
 // 引入 Mongoose
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
-    uid: { // 用户ID
-        type: String,
-        required: true
-    },
-    email: String, // 用户邮箱
-    password: String, // 用户密码
-    name: String,
+    email: { type: String, match: /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/, required: true, unique: true }, // 用户邮箱, 正则匹配，必填, 唯一
+    password: { type: String, minlength: 6, required: true }, // 用户密码，6-32位
+    name: { type: String, trim: true, minlength: 1, maxlength: 32, required: true, unique: true }, // 用户名，去除空格，1-32个字符，必填, 唯一
     avatarUrl: String,  // 用户头像
     sex: {
         type: Number,
-        default: 0
+        default: 0,
+        enum: [0, 1, 2] // 只能是 0 1 2
     }, // 性别 0未设置 1男 2女
 }, {
     timestamps: { // 使用时间戳
@@ -262,9 +238,11 @@ const UserSchema = new Schema({
 module.exports = mongoose.model('User', UserSchema);
 ```
 
-mongoose 对 `Schema` 的定义可以设置类型、验证条件、是否必填等，定义好 model 之后，可以在 `service` 里面用来操作集合。
+#### service
 
-因此再去新建对应的 service ，根据前面的实战，这里代码如下：
+mongoose 对 `Schema` 的定义可以设置类型、验证条件、是否必填等，这可以参考[文档](https://mongoosejs.com/docs/validation.html) ，定义好 model 之后，可以在 `service` 里面用来操作集合。
+
+新建对应的 service ，根据前面的实战，这里代码如下：
 
 ```js
 // app/service/user.js
@@ -293,6 +271,8 @@ module.exports = {
 };
 ```
 
+#### controller
+
 接下来就需要将在 `controller` 中将方法指定到 `service` 的用户创建逻辑，比如：
 
 ```js
@@ -303,13 +283,13 @@ const { user } = require("../service"); // 引入service
 class UserController {
   async create(ctx) {
     try {
-      const { email, password, name } = ctx.body;
+      const { email, password, name, sex } = ctx.request.body;
       const newUser = await user.create({
-        email, password, name
+        email, password, name, sex
       });
-      ctx.setResponse({ data: newUser });
+      ctx.setResponse(newUser);
     } catch (err) {
-      console.log(err);
+      ctx.status = 400;
       throw new Error(err);
     }
   }
@@ -329,6 +309,39 @@ module.exports = {
 };
 ```
 
+#### router
+
+接下来需要在路由指定请求路径和方式，新建用户对于的路由文件 `app/router/user.js` ，
+
+```js
+// app/router/home.js
+
+const router = require('koa-router')();
+const { user } = require('../controller'); // 引入 user controller
+
+router.post('/', user.create); // post请求，指定到创建用户
+
+module.exports = router;
+
+
+// app/router/index.js
+// ...
+const home = require('./home');
+const user = require('./user');
+// ...
+router.use('/home', home.routes(), home.allowedMethods()); // 设置home的路由
+router.use('/user', user.routes(), user.allowedMethods()); // 设置user的路由
+
+module.exports = router;
+
+```
+
+#### koa-bodyparser
+
+> Node.js 接受到了一个 `POST` 或 `PUT` 请求时，请求体的获得相对麻烦。可以从传入请求对象的 `request` 监听 `'data'` 和 `'end'` 事件从而把 数据给取出来。每次 `'data'` 事件中触发抓获的数据块是一个 [`Buffer`](https://nodejs.org/api/buffer.html)。通常是把这些数据收集到一个数组中，然后在 `'end'` 事件中拼接并且转化为字符串。
+>
+> 在 express 中，可以使用 body-parser 来获得POST请求的body（从 **express v4.16** 不再需要，可以直接使用 `app.use(express.json())` ）。
+
 由于需要获取 `POST` 请求`body` 里面的 JSON 数据，还需要用到 [koa-bodyparser](https://github.com/koajs/bodyparser) ，koa-bodyparser 支持 `json`, `form` 和 `text` 类型的 body 数据。安装 koa-bodyparser：
 
 ```shell
@@ -337,152 +350,49 @@ $ npm install koa-bodyparser --save
 
 使用：
 
-```js
+```diff
 const Koa = require('koa');
-const bodyParser = require('koa-bodyparser');
++ const bodyParser = require('koa-bodyparser');
 
 const app = new Koa();
 // ...
 app.use(logger());
-app.use(bodyParser());
++ app.use(bodyParser());
 // ...
-```
-
-为了便于逻辑控制，我们将注册用户的操作放到单独的文件中进行，新增目录 controllers ，并在其中新增 index.js 文件和 user.js 文件。
-
-controllers/user.js
-
-```js
-……
-const response = require('../utils/response');
-
-class UserController {
-  constructor() {}
-  // 定义一个一部函数register用来注册用户，接收请求传过来的body
-  async register(reqBody) {
-    let dataArr = { // 展开运算，并添加创建时间
-      ...reqBody,
-      createDate: new Date()
-    }
-    try {
-      let list = await user.find({email: dataArr.email}); // 先查询是否存在该用户
-      let respon = {};
-      if (list && list.length > 0) {
-        respon = response({errorCode: '002'});
-      } else {
-        let newUser = await user.create(dataArr); // 如果没有注册过就进行注册
-        respon = response({data: newUser});
-      }
-      return respon;
-    } catch (err) {
-      console.log(err)
-      throw new Error(err);
-      return err;
-    }
-  }
-}
-
-const userController = new UserController();
-
-module.exports = userController;
-```
-
-我们也新建一个 controllers/index.js 来引入要用的 controller：
-
-```js
-const user = require('./user');
-
-module.exports = {
-  user
-};
-
-```
-
-接下来需要在路由定义一个请求接口了，我们将之前的 routes\users.js 进行以下修改：
-
-```js
-const router = require('koa-router')();
-const {user} = require('../controllers');
-
-router.get('/', (ctx, next) => {
-  ctx.response.body = 'users';
-});
-
-// 新增一个post路由，用来接收post请求
-router.post('/register', async (ctx, next) => {
-  // 接收客户端请求传递的数据
-  let reqBody = ctx.request.body;
-  console.log(ctx.request.body);
-  ctx.body = await user.register(reqBody);
-});
-
-module.exports = router;
-
 ```
 
 这样就定义了一个 RESTful API 了，为了验证能够调用成功，我们使用 postman 来进行调试。
 
-### postman-调用接口
+### 调用测试
 
-安装postman，打开并进行注册，这里不进行描述。打开postman，新增配置一个接口调用，如下图：
+#### Postman
 
-![01](01.jpg)
+通过 `POST` 请求 http://localhost:3000/api/user 接口，请求体为必填的数据，请求正常返回：
 
-点击send，我们就可以发送一个post请求了，我们采用JSON格式传递数据。通过上面的操作我们看到 postman 里面产生响应数据，但是并没有我没新建的用户信息，我们再查看数据库集合里面多了一个文档，但是缺少了用户信息。
+**postman请求成功**
 
-![02](02.jpg)
+![postman请求成功](./postman请求成功.png)
 
+现在来修改请求体，去掉一些必填项看看响应结果：
 
+**postman请求失败**
 
-> 描述 补充
+![postman请求失败](./postman请求失败.png)
 
-造成这个结果的原因是我们采用 JSON 类型来传递请求数据，context 里面获取的请求 body 为 undefined。为了让 koa 能够支持 JSON 类型的 body 数据，我们 [koa-bodyparser](https://github.com/koajs/bodyparser) 来处理,，koa-bodyparser 支持 `json`, `form` and `text` 类型的 body 。
+#### 跨域访问
 
-安装：
+通过上面的实战，我们已经能够经过 postman 请求接口并存入数据了，但在前端页面中去请求这个接口，发现浏览器的 console 里面报了一个错误。
 
-```shell
-npm install koa-bodyparser
-```
-
-在 app.js 使用这个中间件：
-
-```js
-const Koa = require('koa');
-const app = new Koa();
-
-……
-const bodyParser = require('koa-bodyparser');
-
-
-……
-app.use(logger());
-app.use(bodyParser());
-app.use(routes.routes()).use(routes.allowedMethods());
-……
-```
-
-重启服务之后，我们再次点击发送。
-
-![03](03.jpg)
-
-### 跨域访问
-
-通过上面的实例，我们已经能够经过 postman 请求接口并存入数据了。为了验证接口是否能够在前端项目里面调用，我们将在前端页面中去请求这个接口。前端项目地址：待补充
-
-在启动页面之后我们输入对应的数据，点击注册。我们发现浏览器的 console 里面报了一个错误。
-
-Failed to load http://localhost:3000/v1/users/register: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost:8080' is therefore not allowed access.
+Failed to load http://localhost:3000/api/user: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost:8080' is therefore not allowed access.
 
 这正是因为我们的接口没有允许跨域访问请求导致的。
 
-![04](04.jpg)
-
-> 描述 补充
+> 描述待补充
 
 为了解决这个问题，我们使用 [koa-cors](https://www.npmjs.com/package/koa-cors) 中间件来处理跨域请求。
 
 ```shell
-npm install koa-cors
+$ npm install koa-cors --save
 ```
 
 app.js
@@ -499,8 +409,4 @@ app.use(bodyParser());
 
 ```
 
-重启服务之后我们再次点击注册。
-
-![05](05.jpg)
-
-成功，我们已经能在前端项目调用注册接口来注册用户了。
+重启服务之后再次在前端点击注册，注册成功。
