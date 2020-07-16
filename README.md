@@ -22,11 +22,13 @@
 - 第四章 [MongoDB](./docs/chapter-4/chapter-4.md)
 - 第五章 [环境配置](./docs/chapter-5/chapter-5.md)
 - 第六章 [插入数据](./docs/chapter-6/chapter-6.md)
+- 第七章 [用户创建](./docs/chapter-7/chapter-7.md)
 
 ### 中间件使用
 
 - [Koa中间件使用之koa-router](./docs/middleware/koa-router.md)
 - [Koa中间件使用之koa-nunjucks-2](./docs/middleware/koa-nunjucks-2.md)
+- [Koa中间件使用之koa-cors](./docs/middleware/koa-cors.md)
 
 ### 基础知识
 

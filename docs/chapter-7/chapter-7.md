@@ -1,12 +1,12 @@
 *我们使用 RESTful 的风格设计一个接口，方便前后端进行通信，实现前后端分离。*
 
-在开始实战之前，先来了解一下 RESTful API 。
+在开始实战之前，先来结合项目实际，了解一下 RESTful API 。
 
 ### RESTful API 设计
 
 #### 域名相关
 
-理论上应该将 API 部署在专门的域名如： `https://api.example.com` ，但由于目前 API 很简单，在不考虑进一步扩展 API 的情况下，这里准备放在 `https://example.org/api/` 下面，因此在前面的实战中，已经为路由增加 `/api` 前缀。
+理论上应该将 API 部署在专门的域名如： `https://api.example.com` ，但由于目前 API 很简单，这里准备放在 `https://example.org/api/` 下面，在前面的实战中，已经为路由增加 `/api` 前缀。
 
 #### 版本
 
@@ -49,13 +49,15 @@ https://example.com/api/v1/tags
 | DELETE | `/api/v1/articles/:id`      | 删除某一篇文章               | 空对象       |
 | GET    | `/api/v1/articles/:id/tags` | 获取某一篇文章的标签列表     | 标签列表     |
 
-**常见参数**
+**常用参数**
+
+这里结合个人实际，采取如下的参数
 
 - ?limit=10：指定返回记录的数量
 - ?offset=10：指定返回记录的开始位置。
-- ?page=2&per_page=100：指定第几页，以及每页的记录数。
+- ?page=2&pageSize=10：指定第几页，以及每页的记录数。
 - ?sortby=name&order=asc：指定返回结果按照哪个属性排序，以及排序顺序。
-- ?animal_type_id=1：指定筛选条件
+- ?articlesId=1：指定筛选条件
 
 #### 状态码
 
@@ -160,7 +162,7 @@ app.use(logger()); // 处理log的中间件
 // ...
 ```
 
-在需要进行响应的地方调用，比如之前写的创建文章接口
+在需要进行响应的地方调用，比如之前写的创建文章接口：
 
 ```diff
 // app/controller/article.js
@@ -175,9 +177,10 @@ class ArticleController {
         content: "从零开始的koa实战",
         summary: "实战"
       });
-      ctx.setResponse(newArticle);
+-       ctx.body = newArticle;
++       ctx.setResponse(newArticle);
     } catch (err) {
-      ctx.status = 400;
++       ctx.status = 400;
       throw new Error(err);
     }
   }
@@ -193,18 +196,6 @@ module.exports = new ArticleController();
 ```
 
 那错误的请求会怎么响应？这将在接下来的实战中进行验证。
-
-config/errorCode.json
-
-```js
-{
-    "000":"系统错误，请联系管理员。",
-    "001":"请先登录账户登录。",
-    "002":"该邮箱已经注册过，请更换邮箱。",
-    "003":"用户登录验证失败，请尝试重新登录。",
-    // 省略
-}
-```
 
 ### 注册接口
 
@@ -311,7 +302,7 @@ module.exports = {
 
 #### router
 
-接下来需要在路由指定请求路径和方式，新建用户对于的路由文件 `app/router/user.js` ，
+接下来需要在路由指定请求路径和方式，新建用户对于的路由文件 `app/router/user.js` ：
 
 ```js
 // app/router/home.js
@@ -361,7 +352,7 @@ app.use(logger());
 // ...
 ```
 
-这样就定义了一个 RESTful API 了，为了验证能够调用成功，我们使用 postman 来进行调试。
+这样就定义了一个 RESTful API 了，为了验证能否调用成功，我们使用 postman 来进行调试。
 
 ### 调用测试
 
@@ -385,31 +376,28 @@ app.use(logger());
 
 Failed to load http://localhost:3000/api/user: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost:8080' is therefore not allowed access.
 
-这正是因为我们的接口没有允许跨域访问请求导致的。
+这正是因为我们的接口没有允许跨域访问请求导致的，为了解决这个问题，我们使用 [koa-cors](https://www.npmjs.com/package/koa-cors) 中间件来处理跨域请求。关于 CORS 和 koa-cors ，这里有比较详细的中间件使用指南： [Koa中间件使用之koa-cors](../middleware/koa-cors.md) 。
 
-> 描述待补充
-
-为了解决这个问题，我们使用 [koa-cors](https://www.npmjs.com/package/koa-cors) 中间件来处理跨域请求。
+#### 安装 koa-cors
 
 ```shell
 $ npm install koa-cors --save
 ```
 
-app.js
+#### 使用 koa-cors
 
 ```js
-……
+// ...
 const cors = require('koa-cors');
 
-……
-app.use(logger());
+// ...
+app.use(logger()); // 处理log的中间件
 app.use(cors());
 app.use(bodyParser());
-……
-
+app.use(responseHandler()); // 处理响应的中间件
+// ...
 ```
 
 重启服务之后再次在前端点击注册，注册成功。
 
-
-下一步，我们来了解 mongoose 操作数据库的基础，增删查改，文档关联查询等。
+到这里，我们了解了RESTful API的知识，以及完成了用户的创建。下一步，我们来了解用户验证，通过 JWT 实现用户登录…
