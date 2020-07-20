@@ -348,7 +348,7 @@ const Koa = require('koa');
 const app = new Koa();
 // ...
 app.use(logger());
-+ app.use(bodyParser());
++ app.use(bodyParser()); // 使用bodyParser中间件，可以从post请求获取请求体
 // ...
 ```
 
@@ -427,12 +427,12 @@ $ npm install koa-cors --save
 
 ```js
 // ...
-const cors = require('koa-cors');
+const cors = require('koa-cors'); // 引入 koa-cors 中间件
 
 // ...
 app.use(logger()); // 处理log的中间件
-app.use(cors());
-app.use(bodyParser());
+app.use(cors()); // 启用cors， 支持传递配置
+app.use(bodyParser()); // 使用bodyParser中间件，可以从post请求获取请求体
 app.use(responseHandler()); // 处理响应的中间件
 // ...
 ```
