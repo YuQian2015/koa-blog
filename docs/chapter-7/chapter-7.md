@@ -374,9 +374,48 @@ app.use(logger());
 
 通过上面的实战，我们已经能够经过 postman 请求接口并存入数据了，但在前端页面中去请求这个接口，发现浏览器的 console 里面报了一个错误。
 
-Failed to load http://localhost:3000/api/user: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost:8080' is therefore not allowed access.
+比如，我们有如下一个页面用来发送请求：
 
-这正是因为我们的接口没有允许跨域访问请求导致的，为了解决这个问题，我们使用 [koa-cors](https://www.npmjs.com/package/koa-cors) 中间件来处理跨域请求。关于 CORS 和 koa-cors ，这里有比较详细的中间件使用指南： [Koa中间件使用之koa-cors](../middleware/koa-cors.md) 。
+```jsx
+import React, { PureComponent } from 'react';
+import axios from 'axios';
+
+class HomePage extends PureComponent {
+
+    async createUser() {
+        try {
+            const res = await axios.post('http://localhost:3000/api/user', {
+                "name": "moyufed",
+                "email": "xxxx@moyufed.com",
+                "password": "123456",
+                "sex": 1
+            })
+            console.log(res);
+        }
+        catch (error) {
+            console.log(error);
+        };
+    }
+
+    render() {
+        return <div>
+            <button onClick={this.createUser}>发送请求</button>
+        </div>
+    }
+}
+
+export default HomePage;
+```
+
+点击发送请求之后，可以看到有如下报错信息：
+
+```shell
+Access to XMLHttpRequest at 'http://localhost:3000/api/user' from origin 'http://localhost:8888' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```
+
+这正是因为我们的接口没有允许跨域访问请求导致的。
+
+为了解决这个问题，我们使用 [koa-cors](https://www.npmjs.com/package/koa-cors) 中间件来处理跨域请求。关于 CORS 和 koa-cors ，这里有比较详细的中间件使用指南： [Koa中间件使用之koa-cors](../middleware/koa-cors.md) 。
 
 #### 安装 koa-cors
 
