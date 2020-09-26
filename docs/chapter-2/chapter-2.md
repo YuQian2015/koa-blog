@@ -524,3 +524,7 @@ koa-blog
 
 ```
 下一步，我们来实现log… 
+
+
+
+> 本实战代码已经创建了GitHub仓库：https://github.com/YuQian2015/koa-blog ，欢迎关注。
