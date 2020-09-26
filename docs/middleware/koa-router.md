@@ -29,7 +29,7 @@ $ npm install koa-router --save
 
 #### 使用koa-router
 
-首先，使用 `require()` 引入 `koa-router` ，并且对其实例化（支持传递参数），然后使用获取到的路由实例 `router` 设置一个路径，将 `'/'` 匹配到相应逻辑，返回一段HTML 。接着还需要分别调用  `router.routes()` 和 `router.allowedMethods()` 来得到两个中间件，并且调用 `app.use()` 使用这两个：
+首先，使用 `require()` 引入 `koa-router` ，并且对其实例化（支持传递参数），然后使用获取到的路由实例 `router` 设置一个路径，将 `'/'` 匹配到相应逻辑，返回一段HTML 。接着还需要分别调用  `router.routes()` 和 `router.allowedMethods()` 来得到两个中间件，并且调用 `app.use()` 使用这两个中间件：
 
 ```js
 const Koa = require('koa'); // 引入koa
@@ -63,7 +63,7 @@ app.listen(3000, () => {
 
 #### 不同请求方式
 
-Koa-router 请求方法方式： `get` 、 `put` 、 `post` 、 `patch` 、 `delete` 、 `del`  ，而使用方法就是 `router.方式()`  ，比如 `router.get()` 和 `router.post()` 。而 `router.all()` 会匹配所有的请求方法。
+Koa-router 请求方式： `get` 、 `put` 、 `post` 、 `patch` 、 `delete` 、 `del`  ，而使用方法就是 `router.方式()`  ，比如 `router.get()` 和 `router.post()` 。而 `router.all()` 会匹配所有的请求方法。
 
 当 URL 匹配成功，`router` 就会执行对应的中间件来对请求进行处理，下面是使用示例：
 

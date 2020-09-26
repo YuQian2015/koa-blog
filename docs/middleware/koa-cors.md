@@ -30,4 +30,46 @@ Web应用向服务器请求资源时，由于同源策略限制，Web应用程�
 - Access-Control-Allow-Methods - 预检请求的响应，指明实际请求所允许使用的 HTTP 方法
 - Access-Control-Allow-Headers - 预检请求的响应，指明实际请求中允许携带的首部字段
 
-### koa-cors
+### Koa-cors
+
+*Koa-cors 是基于 [node-cors](https://github.com/troygoode/node-cors) 开发的 Koa CORS中间件。*
+
+#### 安装
+
+```shell
+$ npm install koa-cors --save
+```
+
+#### 使用
+
+```js
+var koa = require('koa');
+var route = require('koa-route');
+var cors = require('koa-cors');
+var app = koa();
+
+app.use(cors());
+
+app.use(route.get('/', function() {
+  this.body = { msg: 'Hello World!' };
+}));
+
+app.listen(3000);
+```
+
+#### 配置
+
+具体的配置参考 [koa-cors](https://github.com/evert0n/koa-cors) 文档，这里做简单介绍
+
+- `origin` ：配置 **Access-Control-Allow-Origin** 头部
+- `expose` ：配置 **Access-Control-Expose-Headers** 头部
+- `maxAge` ：配置 **Access-Control-Max-Age** 头部
+- `credentials` ：配置 **Access-Control-Allow-Credentials** 头部
+- `methods` ：配置 **Access-Control-Allow-Methods** 头部
+- `headers` ：配置 **Access-Control-Allow-Headers**  头部
+
+
+
+### 参考资料
+
+- [MDN - HTTP访问控制（CORS）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)

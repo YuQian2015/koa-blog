@@ -5,8 +5,8 @@ const Koa = require('koa');
 const config = require('config'); // 引入config
 const appConfig = config.get('App'); // 直接使用 config 获取App的配置
 const apiPrefix = config.get('Router.apiPrefix'); // 可以通过Router.apiPrefix获取具体的值
-const dbConfig = config.get('Database');
 const bodyParser = require('koa-bodyparser');
+const cors = require('koa-cors'); // 引入 koa-cors 中间件
 const { mongooseConnect } = require('./config/plugin');
 mongooseConnect();
 
@@ -46,7 +46,8 @@ app.use(koaNunjucks({
 }));
 
 app.use(logger()); // 处理log的中间件
-app.use(bodyParser());
+app.use(cors()); // 启用cors， 支持传递配置
+app.use(bodyParser()); // 使用bodyParser中间件，可以从post请求获取请求体
 app.use(responseHandler()); // 处理响应的中间件
 
 // 使用中间件 处理404
