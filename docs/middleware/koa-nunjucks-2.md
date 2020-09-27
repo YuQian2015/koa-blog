@@ -44,7 +44,7 @@ const env = nunjucks.configure(config.path, config.nunjucksConfig);
   };
 ```
 
-从上面的代码可以看出，在创建 koa-nunjucks-2 中间件时，可以传递文件后缀 `ext` ，渲染方法名 `functionName` ，以及 nunjucks 的配置信息 `nunjucksConfig` 等。
+从上面的代码可以看出，在创建 koa-nunjucks-2 中间件时，可以传递文件后缀 `ext` ，渲染方法名 `functionName` ，是否需要响应 HTML `writeResponse` ， 以及 nunjucks 的配置信息 `nunjucksConfig` 等。
 
 ### 基本配置
 
