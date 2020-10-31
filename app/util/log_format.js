@@ -8,8 +8,10 @@ log4js.configure(log4jsConfig);
 
 let logFormat = {};
 
-let errorLogger = log4js.getLogger('error'); // categories的元素
-let resLogger = log4js.getLogger('response');
+// 分别获取到 categories 里面的 error 和 response 元素
+// 目的是为了输出错误日志和响应日志
+const errorLogger = log4js.getLogger('error');
+const resLogger = log4js.getLogger('response');
 
 //封装错误日志
 logFormat.error = (ctx, error, resTime) => {
